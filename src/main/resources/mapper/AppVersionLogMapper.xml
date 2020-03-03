@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.AppVersionLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.app.mdc.model.system.AppVersionLog">
+        <id column="id" property="id" />
+        <result column="version_number" property="versionNumber" />
+        <result column="version_info" property="versionInfo" />
+        <result column="updatetime" property="updatetime" />
+    </resultMap>
+
+</mapper>

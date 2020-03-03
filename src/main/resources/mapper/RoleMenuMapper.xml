@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.RoleMenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.app.mdc.model.system.RoleMenu">
+        <id column="id" property="id" />
+        <result column="role_id" property="roleId" />
+        <result column="menu_id" property="menuId" />
+    </resultMap>
+
+
+	<select id="getFirstMenus" resultType="java.util.Map">
+		SELECT
+			m.id, 
+			m.status,
+			m.name,
+			m.icon,
+			m.url,
+			m.level,
+			m.rank
+		FROM
+			sys_menu m
+			left join sys_role_menu rm on rm.menu_id = m.id
+			left join sys_user_role ru on ru.role_id = rm.role_id
+			left join sys_user u on u.id = ru.user_id
+		WHERE
+			u.id = #{userId}
+			and m.level=1
+			and m.status='A'
+			and m.deleted=0
+		group by m.id
+		order by m.rank
+	</select>
+	
+	<select id="getChildMenus" resultType="com.app.mdc.model.system.Menu" parameterType="java.util.Map">
+		SELECT
+			m.id,
+			m.status,
+			m.name,
+			m.icon,
+			m.url,
+			m.level,
+			m.rank,
+			m.parent_id parentId
+		FROM
+		sys_menu m
+		left join sys_role_menu rm on rm.menu_id = m.id
+		left join sys_user_role ru on ru.role_id = rm.role_id
+		left join sys_user u on u.id = ru.user_id
+		<where>
+			<if test="userId != null and userId !='' ">
+				AND u.id = #{userId}
+			</if>
+			<if test="parentId != null and parentId !='' ">
+				AND  m.parent_id=#{parentId}
+			</if>
+			and m.status='A'
+			and m.deleted=0
+		</where>
+		group by m.id
+		order by m.rank
+	</select>
+</mapper>

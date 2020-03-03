@@ -1,0 +1,105 @@
+server:
+  port: 8080
+
+pic:
+  savePath: C:\mdcupload\
+  libreOffice : C:\Program Files\LibreOffice
+  fileChangePath: C:\fileChange\
+  questionUrl : http://www.baidu.com
+
+#spring基本配置
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  datasource:
+    name: test
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialSize: 10
+    minIdle: 10
+    maxActive: 50
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 30000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,slf4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+#  quartz:
+#    #相关属性配置
+#    properties:
+#      org:
+#        quartz:
+#          scheduler:
+#            instanceName: clusteredScheduler
+#            instanceId: AUTO
+#          jobStore:
+#            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+#            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+#            tablePrefix: QRTZ_
+#            isClustered: true
+#            clusterCheckinInterval: 10000
+#            useProperties: false
+#          threadPool:
+#            class: org.quartz.simpl.SimpleThreadPool
+#            threadCount: 10
+#            threadPriority: 5
+#            threadsInheritContextClassLoaderOfInitializingThread: true
+#    #数据库方式
+#    job-store-type: jdbc
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 10MB
+#mybatis配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  config-location: classpath:mybatis-config.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#mybatis配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  global-config:
+    db-column-underline: true #驼峰下划线转换
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    db-config:
+      #字段策略 IGNORED:"忽略判断",NOT_NULL:"非 NULL 判断"),NOT_EMPTY:"非空判断"
+      field-strategy: not_null
+  configuration:
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#pagehelper插件配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: "false" #true时，超过最大数量的页数，仍然可以返回数据
+  support-methods-arguments: "true"
+  params: count=countSql
+  auto-runtime-dialect: "true"
+
+logging:
+  level:
+    com.app.mdc: INFO
+    org.springframework.web: TRACE
+  config: classpath:logback-spring.xml
+
+web3j:
+  client-address: https://mainnet.infura.io/v3/50d1c4c05dbd472b85e4acf1cf58b01b
+  admin-client: true
+  httpTimeoutSeconds: 600

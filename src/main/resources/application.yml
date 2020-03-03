@@ -1,0 +1,54 @@
+spring:
+  profiles:
+    active: dev
+    include: base
+  mail:
+    host: smtp.126.com
+    username: MDC_COIN_SUPPORT@126.com
+    password: mdc202002
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback:  false
+          starttls:
+            enable: true
+            required: true
+      port: 465
+
+mdc:
+  blankList:
+    - /admin/users/add
+    - /verificationCode/getVerificationCode
+    - /admin/users/resetPassword
+    - /notice/list
+  pchost: http://mdcgame.top
+---
+vas:
+  walletUrl: http://124.156.167.70:6513
+
+server:
+  port: 8080
+#spring基本配置，开发环境
+spring:
+  profiles: dev
+  datasource:
+    name: test
+    url: jdbc:mysql://119.28.202.253:3306/numberone?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false&useSSL=false&serverTimezone=CTT
+    username: root
+    password: 123456
+license:
+  key: "b266593f-21d6-4772-9ef9-795a5faffc78"
+
+pic:
+  postUrl: http://127.0.0.1:80
+  APPID : IdsRsnLAoS7d3O1FDHHSc6
+  APPKEY : BCMTPnVbqg8PVL1zbeBDj3
+  MASTERSECRET : 9GfC5TVPQJAXfbTUJ2ms98
+  msgPushUrl : http:///127.0.0.1:80/appMsgPush
+  appPackagaName: ywApp.dclond
+

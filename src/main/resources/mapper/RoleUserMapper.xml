@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.RoleUserMapper">
+
+	<select id="getUserList" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+		u.status,
+		u.username,
+		u.password,
+		u.name,
+		u.telephone,
+		u.position,
+		u.remark,
+		u.companyid,
+		r.name  'roleName',
+		r.id  'roleId'
+		FROM
+		sys_user u,
+		sys_user_role ru,
+		sys_role r
+		<where>
+			u.id = ru.user_id
+			AND r.id = ru.role_id
+			<if test="id != null and id !=''">
+				AND u.id = #{id}
+			</if>
+			<if test="roleName != null and roleName !=''">
+				AND r.name = #{roleName}
+			</if>
+			<if test="username != null and username !=''">
+				<bind name="_username" value="'%'+username+'%'"/>
+				AND u.username = #{_username}
+			</if>
+			<if test="telephone != null and telephone !=''">
+				AND u.telephone = #{telephone}
+			</if>
+			<if test="code != null and code !=''">
+				AND r.code = #{code}
+			</if>
+			<if test="name != null and name !=''">
+				<bind name="_name" value="'%'+name+'%'"/>
+				AND u.name = #{name}
+			</if>
+			and u.deleted=0
+		</where>
+	</select>
+
+	<select id="getOperaters" resultType="com.app.mdc.model.system.User" parameterType="java.util.Map">
+		SELECT
+		u.id id,
+		u.status status,
+		u.username username,
+		u.password password,
+		u.name name,
+		u.telephone telephone,
+		u.position position,
+		u.remark remark,
+		u.companyid companyid,
+		u.rank 'rank',
+		u.code code,
+		u.district_id district_id
+		from sys_user u,sys_user_role ru,sys_role r
+		<where>
+			u.id = ru.user_id
+			and ru.role_id=r.id
+			<if test="roleCode != null and roleCode !='' ">
+				AND r.code = #{roleCode}
+			</if>
+			and u.deleted=0
+		</where>
+	</select>
+
+</mapper>

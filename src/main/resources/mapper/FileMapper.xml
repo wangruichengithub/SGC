@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.FileMapper">
+
+
+    <select id="getFilesByMoudleId" resultType="map">
+        select
+        GROUP_CONCAT(id) fileIds,
+        GROUP_CONCAT(filename) fileNames
+        from sys_files
+        where deleted = 0
+        <if test='moudleId!=null and moudleId!=""'>
+            and moudle_id=#{moudleId}
+        </if>
+        order by updatetime desc
+    </select>
+
+    <update id="deleteFileByMoudleId">
+        update sys_files set moudle_id = null where moudle_id = #{moudleId}
+    </update>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.mdc.UserContractMapper">
+
+    <select id="getUserContractByTypeAndUserId" resultType="com.app.mdc.model.mdc.UserContract">
+        select
+        muc.id ,
+        muc.user_id as userId ,
+        muc.contract_id as contractId,
+        muc.number
+        from
+        mdc_user_contract muc
+        join sys_contract sc on sc.id = muc.contract_id
+        where
+        muc.user_id = #{userId} and sc.type = #{type} and muc.del_flag = 0
+    </select>
+
+    <select id="getUnionSignTotalMoney" resultType="BigDecimal">
+        select
+        ifnull(sum(sc.amount),0)
+        from
+        mdc_user_contract muc
+        join sys_contract sc on sc.id = muc.contract_id
+        where
+        del_flag = 0 and sc.type = 1
+        and user_id in(
+        select reced_id from sys_user_level where rec_id = #{userId} union select #{userId}
+        )
+    </select>
+
+    <select id="getUnionAdvanceTotalMoney" resultType="BigDecimal">
+        select
+        ifnull(sum(sc.amount*muc.number),0)
+        from
+        mdc_user_contract muc
+        join sys_contract sc on sc.id = muc.contract_id
+        where
+        del_flag = 0 and sc.type = 2
+        and user_id in(
+        select reced_id from sys_user_level where rec_id = #{userId} union select #{userId}
+        )
+    </select>
+
+</mapper>

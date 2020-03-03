@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.socket.TeamMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="UserResultMap" type="com.app.mdc.model.system.User">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="telephone" property="telephone"/>
+    </resultMap>
+
+    <select id="findTeamUsersByTeamId" resultMap="UserResultMap">
+        SELECT
+           users.id AS id,
+           users.NAME AS NAME,
+           users.telephone AS telephone
+        FROM
+           sys_user users
+        left join socket_user_team userteam on userteam.user_id = users.id
+        where userteam.team_id = #{teamId}
+    </select>
+
+</mapper>

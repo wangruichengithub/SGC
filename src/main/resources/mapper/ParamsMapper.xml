@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.ParamsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.app.mdc.model.system.Params">
+        <id column="id" property="id" />
+        <result column="status" property="status" />
+        <result column="deleted" property="deleted" />
+        <result column="createtime" property="createtime" />
+        <result column="updatetime" property="updatetime" />
+        <result column="name" property="name" />
+        <result column="key_name" property="keyName" />
+        <result column="key_value" property="keyValue" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+</mapper>

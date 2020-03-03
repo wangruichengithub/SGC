@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.RoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.app.mdc.model.system.Role">
+        <id column="id" property="id" />
+        <result column="status" property="status" />
+        <result column="deleted" property="deleted" />
+        <result column="createtime" property="createtime" />
+        <result column="updatetime" property="updatetime" />
+        <result column="code" property="code" />
+        <result column="name" property="name" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <select id="findRolesByUserId" resultMap="BaseResultMap">
+      select
+             roles.role_id as id,
+             roles.status as status,
+             roles.del_flag as deleted,
+             roles.create_time as createtime,
+             roles.update_time as updatetime,
+             roles.role_key as code,
+             roles.role_name as name,
+             roles.remark as remark
+      from sys_role roles
+      left join sys_user_role mid on mid.role_id = roles.role_id
+      where mid.user_id = #{userId} and roles.del_flag = 0
+    </select>
+
+</mapper>

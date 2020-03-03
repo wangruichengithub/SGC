@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.socket.MessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="UserResultMap" type="com.app.mdc.model.system.User">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="telephone" property="telephone"/>
+    </resultMap>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="MessageResultMap" type="com.app.mdc.model.socket.Message">
+        <id column="id" property="id" />
+        <result column="createtime" property="createtime" />
+        <result column="updatetime" property="updatetime" />
+        <result column="userName" property="userName" />
+        <result column="sendUserId" property="sendUserId" />
+        <result column="type" property="type" />
+        <result column="teamId" property="teamId" />
+        <result column="receiveUserId" property="receiveUserId" />
+        <result column="content" property="content" />
+        <result column="messageType" property="messageType" />
+        <result column="readstatus" property="readstatus"/>
+    </resultMap>
+
+    <select id="findMessageUsersByCurrentUser" resultMap="UserResultMap">
+        SELECT
+        users.id AS id,
+        users.NAME AS NAME,
+        users.telephone AS telephone
+        FROM
+        sys_user users
+        LEFT JOIN socket_message message ON ( message.deleted = 0 AND ( message.send_user_id = users.id OR message.receive_user_id = users.id ) )
+        WHERE
+        ( message.send_user_id = #{id} OR message.receive_user_id = #{id} )
+        AND users.id != #{id}
+        GROUP BY
+        users.id
+        ORDER BY
+        message.createtime DESC
+    </select>
+
+    <select id="getMessageByChat" resultMap="MessageResultMap">
+        select
+            message.id ,
+            message.createtime,
+            message.updatetime,
+            message.user_name as userName,
+            message.send_user_id as sendUserId,
+            message.type as type,
+            message.team_id as teamId,
+            message.receive_user_id as receiveUserId,
+            message.content as content,
+            message.message_type as messageType
+            <if test='type == "1"'>
+                ,message.readstatus as readstatus
+            </if>
+            <if test='type == "2"'>
+                ,if(
+                    message.id not in
+                    (
+                        select
+                        midTMU.message_id
+                        from
+                        socket_team_message_user midTMU
+                        where midTMU.user_id = #{currentUserId} and midTMU.team_id = team.id
+                    ) , 0 ,1
+                ) as readstatus
+            </if>
+        from socket_message message
+        left join socket_team team on team.id = message.team_id
+        where message.deleted = 0
+        <if test='type!=null and type!=""'>
+            <if test='type == "1"'>
+                and (
+                    message.send_user_id = #{currentUserId}
+                    OR message.receive_user_id = #{currentUserId}
+                ) and(
+                    message.send_user_id = #{sendUserId}
+                    or message.receive_user_id = #{sendUserId}
+                )
+            </if>
+            <if test='type == "2"'>
+                and (message.team_id = #{teamId})
+            </if>
+        </if>
+        order by message.createtime desc
+    </select>
+
+    <select id="findmessageChartList" resultType="map">
+        SELECT
+            id AS id,
+            name AS name,
+            createtime AS createtime,
+            type AS type,
+            count as count,
+            content as content,
+            message_type as message_type
+        FROM
+            (
+                (
+                    SELECT
+                        users.id AS id,
+                        users.name AS name,
+                        max(message.createtime) AS createtime,
+                        message.type,
+                        sum(IF (message.readstatus = 0 and message.receive_user_id = #{id}, true, false)) as count,
+                        (select a.content from socket_message a where a.createtime = max(message.createtime)) as content,
+                        (select a.message_type from socket_message a where a.createtime = max(message.createtime)) as message_type
+                    FROM
+                      sys_user users
+                    LEFT JOIN socket_message message ON
+                      (
+                        message.deleted = 0 AND ( message.send_user_id = users.id OR message.receive_user_id = users.id )
+                      )
+                    WHERE users.id != #{id}  and
+                      message.type = 1 and (message.receive_user_id = #{id} or message.send_user_id = #{id})
+                    GROUP BY users.id
+                    ORDER BY createtime desc
+                )
+                UNION ALL
+                (
+                    SELECT
+                        team.id AS id,
+                        team.name AS name,
+                        if(count(message.id) = 0, team.createtime, max(message.createtime)) AS createtime,
+                        2 as type,
+                        sum(
+                            if(
+                                message.id not in
+                                (
+                                    select midTMU.message_id
+                                    from socket_team_message_user midTMU
+                                    where midTMU.user_id = #{id} and midTMU.team_id = team.id
+                                ) and (
+                                    select count(midTMU.message_id)
+                                    from socket_team_message_user midTMU
+                                    where midTMU.team_id = team.id and midTMU.user_id = #{id}
+                                )  != 0
+                                ,true
+                                ,false
+                            )
+                        ) as count,
+                        (select a.content from socket_message a where createtime = max(message.createtime)) as content,
+                        (select a.message_type from socket_message a where a.createtime = max(message.createtime)) as message_type
+                    FROM
+                      socket_team as team left join socket_user_team mid on mid.team_id = team.id
+                    left join sys_user users on users.id = mid.user_id
+                    LEFT JOIN socket_message message ON message.team_id = team.id
+                    WHERE
+                      mid.user_id = #{id}
+                    GROUP BY team.id
+                    ORDER BY createtime desc
+                )
+            ) a
+        ORDER BY
+        a.createtime DESC
+    </select>
+
+    <insert id="insertTeamMessageRead">
+        insert into socket_team_message_user (user_id, message_id, team_id) value (#{userId}, #{messageId}, #{teamId})
+    </insert>
+
+</mapper>

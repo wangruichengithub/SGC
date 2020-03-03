@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.mdc.InComeMapper">
+
+    <select id="selectStaticIncomeGroupByLevel" resultType="Map">
+        <foreach collection="map" index="key" item="value" separator="UNION">
+            select
+             #{key} as level,ifnull(sum(if(contract_salary>#{burnValue},#{burnValue},contract_salary)),0) as totalStaticNum
+            from
+            mdc_income
+            where
+            sel_date = left(#{selDate},10) and FIND_IN_SET(user_id,#{value.ids}) and type = 1
+        </foreach>
+    </select>
+
+    <select id="getAdvanceShareSalary" resultType="Map">
+        select
+        ifnull(sum(mi.number),0) as cardNumber,
+        ifnull(sum(mi.contract_salary),0) as totalIncome
+        from
+        sys_user_level sul
+        join mdc_income mi on mi.user_id = sul.reced_id and mi.sel_date = left(#{selDate},10) and mi.type = 2
+        where
+        sul.rec_id = #{userId}
+    </select>
+
+    <select id="getTotalSum" resultType="BigDecimal">
+        select
+        ifnull(sum(if(mi.contract_salary > #{burnValue}, #{burnValue} , mi.contract_salary )),0)
+        from
+        sys_user_level sul
+        join mdc_income mi on mi.user_id = sul.reced_id and mi.sel_date = left(#{selDate},10) and mi.type = 1
+        where
+        sul.rec_id = #{userId}
+    </select>
+
+    <select id="list" resultType="com.app.mdc.model.mdc.InCome">
+        select
+        id ,
+        m.user_id as userId,
+        contract_salary as contractSalary ,
+        share_salary as shareSalary ,
+        manage_salary as manageSalary ,
+        same_level_salary as sameLevelSalary ,
+        salary ,
+        sel_date as selDate ,
+        u.user_name as userName
+        from
+        mdc_income m
+        left join sys_user u on u.user_id = m.user_id
+        where m.type = 1 and m.user_id = #{userId}
+        order by sel_date desc , salary desc
+    </select>
+</mapper>

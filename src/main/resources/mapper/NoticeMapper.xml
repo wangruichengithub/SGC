@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.mdc.NoticeMapper">
+
+    <select id="selectNewest" resultType="com.app.mdc.model.mdc.Notice">
+       select
+       notice_id as noticeId,notice_title as noticeTitle,notice_type as noticeType,notice_content as noticeContent,status
+       from
+       sys_notice
+       where notice_id = (select max(notice_id) from sys_notice)
+   </select>
+</mapper>

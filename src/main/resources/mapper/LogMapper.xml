@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.LogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.app.mdc.model.system.Log">
+        <id column="id" property="id" />
+        <result column="brower" property="brower" />
+        <result column="createtime" property="createtime" />
+        <result column="ip" property="ip" />
+        <result column="module" property="module" />
+        <result column="operation" property="operation" />
+        <result column="remarks" property="remarks" />
+        <result column="status" property="status" />
+        <result column="updatetime" property="updatetime" />
+        <result column="username" property="username" />
+        <result column="deleted" property="deleted" />
+        <result column="request_tx" property="requestTx" />
+        <result column="response_tx" property="responseTx" />
+    </resultMap>
+</mapper>

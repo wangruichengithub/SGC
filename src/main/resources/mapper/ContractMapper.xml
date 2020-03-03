@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.mdc.ContractMapper">
+
+    <sql id="baseSql">
+        sc.id , sc.type ,sc.level,sc.name,sc.price,sc.amount,sc.unit,sc.introduce,sc.audio_path as audioPath,sc.income_rate as incomeRate,
+        sc.out_rate as outRate,sc.create_time as createTime,sc.create_by as createBy , sc.update_time as updateTime,sc.update_by as updateBy
+    </sql>
+
+    <select id="selectAllContract" resultType="com.app.mdc.model.mdc.Contract">
+        select
+        <include refid="baseSql"></include>
+        from
+        sys_contract sc
+    </select>
+
+    <select id="getHigherContract" resultType="com.app.mdc.model.mdc.Contract">
+        select
+        <include refid="baseSql"></include>
+        from
+        sys_contract sc
+        where
+        sc.type  = 1 and sc.level > (select level from sys_contract where id = #{contractId})
+    </select>
+</mapper>

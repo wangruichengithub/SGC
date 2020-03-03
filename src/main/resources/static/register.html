@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script type="text/javascript" src="https://cache.yimiaovip.com/14371889226433441123.js"></script>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="Baiduspider" content="noindex,nofollow"/>
+    <meta name="Sosospider" content="noindex,nofollow"/>
+    <meta name="sogou spider" content="noindex,nofollow"/>
+    <meta name="360Spider" content="noindex,nofollow"/>
+    <meta name="YodaoBot" content="noindex,nofollow"/>
+    <meta name="Googlebot" content="noindex,nofollow"/>
+    <meta name="MicroMessenger" content="noindex,nofollow"/>
+    <meta name="QQBrowser" content="noindex,nofollow"/>
+</head>
+<style>
+    html {
+        font-size: calc(100vw / 640 * 100);
+        background: url("/img/backgroud.png");
+        height: 110%;
+        align-content: center
+    }
+
+    .main {
+        font-family: "微软雅黑";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6.4rem;
+        height: 6.4rem;
+
+    }
+
+    .line {
+        position: relative;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .registerInput {
+        margin-top: 10px;
+        width: 85%;
+        height: 3em;
+        background-color: #1d499e;
+        border-radius: 8px;
+        border: 1px solid #59f9fe;
+    }
+
+    .submitBtn {
+        margin-top: 40px;
+
+    }
+
+    input::-webkit-input-placeholder {
+        color: #59f9fe;
+        padding-left: 10px;
+        font-size: 12px;
+    }
+
+    input::-moz-input-placeholder {
+        color: #59f9fe;
+        padding-left: 10px;
+        font-size: 12px;
+    }
+
+    input::-ms-input-placeholder {
+        color: #59f9fe;
+        padding-left: 10px;
+        font-size: 12px;
+    }
+
+    input::-webkit-input-placeholder {
+        /* placeholder颜色  */
+        color: #aab2bd;
+        /* placeholder字体大小  */
+        font-size: 12px;
+    }
+
+    input{
+        padding-top:0 ;
+        padding-bottom: 0;
+        font-size: 16px;
+    }
+
+</style>
+<body align="center" style="min-height:100%">
+
+<div class="main" align="center">
+    <div style="margin-top: 60px;">
+        <img src="/img/zhuce.png" style="height: 35px;">
+    </div>
+    <div style="margin-top: 60px">
+        <div>
+            <div class="line">
+                <input name="userName" type="text" class="registerInput" placeholder="请输入手机号/邮箱">
+                <div class="i-name ico"></div>
+            </div>
+            <div class="line">
+                <input id="verCode"  name="code" type="text" class="registerInput" placeholder="请输入验证码">
+                <img id="code" src="/img/code.png" style="position:absolute;right:40px;width: 25%;" onclick="getVerCode()"/>
+                <div style="position:absolute;right:40px;top:25px;width: 25%;font-size: 23px;display: none;border-radius: 5px ;background: lightgray;color: white" id="timer" ><i id="timerText">60</i> s</div>
+            </div>
+            <div class="line parent-div">
+                <input name="password1" type="password" class="registerInput" placeholder="请输入登录密码">
+                <img id="showImg" src="/img/open.png" style="width: 5%; position:absolute;right:40px;top:25px;" onclick="showPass()">
+                <img id="hideImg" src="/img/close.png" style="width: 5%; position:absolute;right:40px;top:25px;display: none" onclick="hidePass()">
+            </div>
+            <div class="line parent-div">
+                <input name="password2" type="password" class="registerInput" placeholder="请再次输入登录密码">
+                <img id="showImg2" src="/img/open.png" style="width: 5%; position:absolute;right:40px;top:25px;" onclick="showPass2()">
+                <img id="hideImg2" src="/img/close.png" style="width: 5%; position:absolute;right:40px;top:25px;;display: none" onclick="hidePass2()">
+            </div>
+            <div class="line parent-div">
+                <input name="payPassWord" type="password" class="registerInput" placeholder="请输入交易密码（6位数字）">
+                <img id="showImg3" src="/img/open.png" style="width: 5%; position:absolute;right:40px;top:25px;" onclick="showPass3()">
+                <img id="hideImg3" src="/img/close.png" style="width: 5%; position:absolute;right:40px;top:25px;;display: none" onclick="hidePass3()">
+            </div>
+            <div class="line ">
+                <input name="shareCode" type="text"  class="registerInput" placeholder="推荐码">
+            </div>
+            <div class="line">
+                <img class="submitBtn" onclick="submit()" src="/img/submit.png">
+                <div><i id="errMsg" style="color: red"></i></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script>
+    var verId;
+    $(function () {
+        $("#code").css("top",($("#verCode").height()-$("#code").height())/2+10 + "px");
+        $("#timer").css("top",($("#verCode").height()-$("#code").height())/2+10 + "px");
+
+        $(".parent-div img").each(function (index,img) {
+            $(img).css("top",($(img).parent().children("input").height()-10)/2+10 + "px");
+        })
+
+        //获取验证码
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] === 'sendCode'){
+                $("input[name='shareCode']").val(pair[1]);
+            }
+        }
+    })
+
+    function submit() {
+        var userName = $("input[name='userName']").val();
+        var code = $("input[name='code']").val();
+        var password = $("input[name='password1']").val();
+        var password2 = $("input[name='password2']").val();
+        var payPassWord = $("input[name='payPassWord']").val();
+        if (!userName ) {
+            alert("请输入手机号/邮箱");
+            return;
+        }
+
+        if (!code ) {
+            alert("请输入验证码");
+            return;
+        }
+
+        if (!password ) {
+            alert("请输入登录密码");
+            return;
+        }
+
+        if (!password2 ) {
+            alert("请再次输入登录密码");
+            return;
+        }
+
+        if (!payPassWord || payPassWord.length !== 6) {
+            alert("请输入交易密码（6位数字）");
+            return;
+        }
+
+        var shareCode = $("input[name='shareCode']").val();
+        var registerType = 1;
+        if (userName.indexOf("@") >= 0) {
+            //邮箱
+            registerType = 0;
+        }
+        if (password !== password2) {
+            alert("两次输入的登录密码不相同");
+            return;
+        }
+        $.ajax({
+            url: "/registerAdd?userName=" + userName + "&loginName=" + userName + "&password=" + password + "&walletPassword=" + payPassWord
+                + "&sendCode=" + shareCode + "&verCode=" + code + "&verId=" + verId + "&registerType=" + registerType,
+            cache: false,
+            contentType: "application/x-www-form-urlencoded",
+            processData: false,
+            type: 'POST',
+            success: function (result) {
+                if (result.code + "" === "0") {
+                    alert("注册成功");
+                    window.location.href= "http://qcode.di198.com/flqJ";
+                } else {
+                   alert(result.msg);
+                }
+            }
+        })
+        ;
+    }
+
+    function showPass() {
+        $("input[name='password1']").attr("type","text");
+        $("#showImg").hide();
+        $("#hideImg").show();
+    }
+
+    function hidePass() {
+        $("input[name='password1']").attr("type","password");
+        $("#hideImg").hide();
+        $("#showImg").show();
+    }
+
+
+    function showPass2() {
+        $("input[name='password2']").attr("type","text");
+        $("#showImg2").hide();
+        $("#hideImg2").show();
+    }
+
+    function hidePass2() {
+        $("input[name='password2']").attr("type","password");
+        $("#hideImg2").hide();
+        $("#showImg2").show();
+    }
+
+
+    function showPass3() {
+        $("input[name='payPassWord']").attr("type","text");
+        $("#showImg3").hide();
+        $("#hideImg3").show();
+    }
+
+    function hidePass3() {
+        $("input[name='payPassWord']").attr("type","password");
+        $("#hideImg3").hide();
+        $("#showImg3").show();
+    }
+
+
+
+    function getVerCode() {
+        var userName = $("input[name='userName']").val();
+        if (!userName) {
+            alert("请输入手机号/邮箱");
+            return;
+        }
+        var url = "";
+        if (userName.indexOf("@") >= 0) {
+            //邮箱
+            url = "/verificationCode/getVerificationCode?kind=0&type=0&email=" + userName;
+        } else {
+            url = "/verificationCode/getVerificationCode?kind=0&type=1&phone=" + userName;
+        }
+        $.ajax({
+            url: url,
+            cache: false,
+            contentType: "application/x-www-form-urlencoded",
+            processData: false,
+            type: 'POST',
+            success: function (result) {
+                if (result.code + "" !== "0") {
+                    alert(result.msg);
+                } else {
+                    verId = result.data.verId;
+                    // alert("验证码已发送，请注意查收")
+                }
+            }
+        });
+
+        //显示计时器
+        $("#code").hide();
+        $("#timer").show();
+        var time = 60;
+        $("#timerText").html(60);
+        var interval = setInterval(function () {
+            time--;
+            if(time < 0){
+                clearInterval(interval);
+                $("#timer").hide();
+                $("#code").show();
+                $("#timerText").html(60);
+                return;
+            }
+            $("#timerText").html(time);
+        },1000);//启动计时器，调用overs函数，
+    }
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.UserLevelMapper">
+
+    <insert id="batchInsert">
+        insert into sys_user_level(rec_id,reced_id,level,create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.recId},#{item.recedId},#{item.level},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <select id="selectRecedUserIds" resultType="Map">
+        select
+        group_concat(reced_id) as ids,
+        `level`
+        from
+        sys_user_level
+        where
+        rec_id = #{userId}
+        group by
+        level
+    </select>
+
+    <select id="getTotalSum" resultType="BigDecimal">
+        select
+        ifnull(sum(sc.amount),0)
+        from
+        sys_user_level sul
+        join mdc_user_contract muc on sul.reced_id = muc.user_id
+        join sys_contract sc on muc.contract_id = sc.id
+        where
+        rec_id = #{userId} and type = 1
+    </select>
+
+    <select id="selectRecIdsByRecedId" resultType="Integer">
+        select
+        rec_id as recId
+        from
+        sys_user_level
+        where
+        reced_id = #{userId}
+        order by level asc
+    </select>
+
+    <select id="getDirectCount" resultType="Integer">
+        select
+        ifnull(count(1),0)
+        from
+        sys_user_level
+        where
+        rec_id =#{userId} and level = 1
+    </select>
+
+
+    <select id="getDirectUsers" resultType="com.app.mdc.model.system.User">
+        select
+        user_id as id ,
+        `level` ,
+        user_name as userName
+        from
+        sys_user where user_id in(
+     select
+        reced_id
+        from
+        sys_user_level
+        where
+        rec_id =#{userId} and level = 1
+        )
+    </select>
+
+    <select id="selectMemberSizeByUserId" resultType="Integer">
+        select
+        count(1) + 1
+        from
+        sys_user_level
+        where
+        rec_id = #{userId}
+    </select>
+
+    <select id="list" resultType="Map">
+        select
+        su.user_id as userId ,
+        create_time as createTime ,
+        user_name as userName,
+        login_name as loginName ,
+        ifnull((select sc.name from mdc_user_contract uc left join sys_contract sc on sc.id = uc.contract_id where user_id = su.user_id and sc.type = 1 and uc.del_flag = 0 limit 1),"") as contractName ,
+        su.member_size as memberSize ,
+        su.union_sign_total_money as unionSignTotalMoney ,
+        0 as cardNumber
+        from
+        sys_user su
+        where
+        su.del_flag = 0 and su.user_id in
+        (select
+        reced_id
+        from
+        sys_user_level
+        where
+        rec_id =#{userId}
+        union
+        select #{userId}
+        )
+        order by su.user_id desc
+     </select>
+
+    <select id="getUsersInUmbrella" resultType="com.app.mdc.model.system.User">
+        select
+        su.user_id as userId ,
+        create_time as createTime ,
+        user_name as userName,
+        login_name as loginName ,
+        su.member_size as memberSize ,
+        su.union_sign_total_money as unionSignTotalMoney ,
+        `level`
+        from
+        sys_user su
+        where
+        su.del_flag = 0 and su.user_id in
+        (select
+        reced_id
+        from
+        sys_user_level
+        where
+        rec_id =#{userId}
+        )
+    </select>
+
+    <select id="getGhztList" resultType="com.app.mdc.model.system.User">
+        select
+        su.user_id as userId ,
+        create_time as createTime ,
+        user_name as userName,
+        login_name as loginName ,
+        su.member_size as memberSize ,
+        su.union_sign_total_money as unionSignTotalMoney ,
+         0 as cardNumber
+        from
+        sys_user su
+        where up_user_id = #{userId}
+    </select>
+
+    <select id="getUnionCardNumber" resultType="Integer">
+    SELECT
+        ifnull( count( 1 ), 0 )
+    FROM
+        mdc_user_contract uc
+        JOIN sys_contract c ON c.id = uc.contract_id
+    WHERE
+        c.type = 1 and
+        user_id in(
+        select
+        reced_id
+        from
+        sys_user_level
+        where
+        rec_id =#{userId}
+        union
+        select #{userId}
+        )
+    </select>
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.UserMapper">
+
+    <select id="getOperaterBook" resultType="java.util.Map">
+        SELECT
+        u.id,
+        u.name,
+        u.username,
+        u.telephone,
+        u.position,
+        u.rank,
+        '' as companyName
+        FROM
+        sys_user u,
+        sys_user_role ru,
+        sys_role r
+        <where>
+            u.id = ru.user_id
+            AND ru.role_id = r.id
+            AND r.code = 'admin_user'
+            AND u.deleted = 0
+        </where>
+
+        UNION
+
+        SELECT
+            u.id,
+            u.name,
+            u.username,
+            u.telephone,
+            u.position,
+            u.rank,
+            '' as companyName
+        FROM
+            sys_user u,
+            sys_user_role ru,
+            sys_role r
+        <where>
+            u.id = ru.user_id
+            AND ru.role_id = r.id
+            AND r.`code` = 'ops_user'
+            AND u.id != #{userId}
+            AND u.deleted = 0
+        </where>
+
+        UNION
+
+        SELECT
+            u.id,
+            u.name,
+            u.username,
+            u.telephone,
+            u.position,
+            u.rank,
+            c.name as companyName
+        FROM
+            sys_user u left join tb_company c
+            on u.companyid=c.id
+        <where>
+            u.companyid IN ( SELECT company_id FROM sys_user_company WHERE user_id = #{userId} )
+            AND u.deleted =0
+        </where>
+        order by rank
+    </select>
+
+    <select id="getCompanyUserBook" resultType="java.util.Map">
+        SELECT
+        u.id,
+        u.name,
+        u.username,
+        u.telephone,
+        u.position,
+        u.rank,
+        '' as companyName
+        FROM
+        sys_user u,
+        sys_user_role ru,
+        sys_role r
+        <where>
+            u.id = ru.user_id
+            AND ru.role_id = r.id
+            AND r.code = 'admin_user'
+            AND u.deleted = 0
+        </where>
+
+        UNION
+
+        SELECT
+            u.id,
+            u.name,
+            u.username,
+            u.telephone,
+            u.position,
+            u.rank,
+            '' as companyName
+        FROM
+            sys_user u,
+            sys_user_role ru,
+            sys_role r
+        <where>
+            u.id = ru.user_id
+            AND ru.role_id = r.id
+            AND r.`code` = 'ops_user'
+            AND u.deleted = 0
+        </where>
+
+        UNION
+
+        SELECT
+            u.id,
+            u.name,
+            u.username,
+            u.telephone,
+            u.position,
+            u.rank,
+            c.name as companyName
+        FROM
+            sys_user u left join tb_company c
+            on u.companyid=c.id
+        <where>
+            and u.companyid IN ( SELECT companyid FROM sys_user WHERE id =  #{userId} )
+            and u.id != #{userId}
+            AND u.deleted =0
+        </where>
+        order by rank
+    </select>
+
+    <select id="getPcAddressBook" resultType="java.util.Map">
+        SELECT
+        u.id,
+        u.name,
+        u.username,
+        u.telephone,
+        u.position,
+        u.rank,
+        c.name as companyName
+        FROM
+        sys_user u
+        left join tb_company c
+        on u.companyid=c.id
+        <where>
+            and u.id != #{userId}
+            AND u.deleted = 0
+        </where>
+    </select>
+
+</mapper>

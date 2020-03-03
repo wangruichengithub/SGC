@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.system.QuartzMapper">
+
+    <select id="getScheduleJob" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT
+            job_id jobId,
+            create_time createTime,
+            update_time updateTime,
+            job_name jobName,
+            job_group jobGroup,
+            job_status jobStatus,
+            case when job_status = 1 then '启用'
+                 when job_status = 0 then '暂停'
+                 when job_status = 2 then '结束' end jobStatusName,
+            case when is_concurrent = 1 then '临时定时'
+                 when is_concurrent = 0 then '固定定时' end concurrentName,
+            cron_expression cronExpression,
+            description,
+            bean_class beanClass,
+            is_concurrent isConcurrent,
+            spring_id springId,
+            method_name methodName,
+            params,
+            prev_time prevTime,
+            next_time nextTime
+        FROM sys_quartz
+
+    </select>
+
+
+</mapper>

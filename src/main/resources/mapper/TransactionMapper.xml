@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.mdc.mapper.mdc.TransactionMapper">
+
+
+    <select id="incomeHistory" resultType="com.app.mdc.model.mdc.Transaction">
+        select
+        transaction_id as transactionId ,
+        from_user_id as fromUserId,
+        from_wallet_address as fromWalletAddress ,
+        to_user_id as toUserId ,
+        to_wallet_address as toWalletAddress ,
+        from_amount as fromAmount ,
+        from_wallet_type as fromWalletType ,
+        to_amount as toAmount ,
+        to_wallet_type as toWalletType ,
+        fee_amount as feeAmount ,
+        transaction_type as transactionType ,
+        create_time as createTime ,
+        remark ,
+        transaction_status as transactionStatus ,
+        transaction_hash as transactionHash ,
+        contract_type as contractType
+        from
+        mdc_transaction
+        where
+        (transaction_type = 4 and from_user_id = #{userId})
+        order by transaction_id desc
+    </select>
+
+    <select id="getTransaction" resultType="com.app.mdc.model.mdc.Transaction">
+        select
+        transaction_id,
+        from_user_id,
+        from_wallet_address,
+        to_user_id,
+        to_wallet_address,
+        create_time,
+        remark,
+        from_amount,
+        from_wallet_type,
+        to_amount,
+        to_wallet_type,
+        transaction_type,
+        fee_amount,
+        transaction_status,
+        transaction_hash,
+        contract_type
+        from mdc_transaction
+        where 0 = 0
+        <if test='from_user_id!=null and from_user_id!=""'>
+            and from_user_id = #{from_user_id}
+        </if>
+        <if test='to_user_id!=null and to_user_id!=""'>
+            and to_user_id = #{to_user_id}
+        </if>
+        <if test='transaction_type!=null and transaction_type!=""'>
+            and transaction_type in
+            <foreach collection="transaction_type" item="transactionType" open="(" close=")">
+                #{transactionType}
+            </foreach>
+
+        </if>
+        <if test='transaction_id!=null and transaction_id!=""'>
+            and transaction_Id=#{transaction_id}
+        </if>
+        <if test='transactionType!=null and transactionType!=""'>
+            and transaction_type = #{transactionType}
+        </if>
+        <if test='transaction_status!=null and transaction_status!=""'>
+            and transaction_status=#{transaction_status}
+        </if>
+
+        <if test='to_wallet_address!=null and to_wallet_address!=""'>
+            and to_wallet_address = #{to_wallet_address}
+        </if>
+
+        <if test='from_wallet_address!=null and from_wallet_address!=""'>
+            and from_wallet_address = #{from_wallet_address}
+        </if>
+
+
+        <if test='to_wallet_type!=null and to_wallet_type!=""'>
+            and to_wallet_type = #{to_wallet_type}
+        </if>
+
+
+        <if test='from_wallet_type!=null and from_wallet_type!=""'>
+            and from_wallet_type = #{from_wallet_type}
+        </if>
+
+        order by create_time desc
+    </select>
+</mapper>

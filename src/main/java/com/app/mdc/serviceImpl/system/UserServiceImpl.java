@@ -2,25 +2,30 @@ package com.app.mdc.serviceImpl.system;
 
 import com.app.mdc.enums.ApiErrEnum;
 import com.app.mdc.exception.BusinessException;
+import com.app.mdc.mapper.mdc.VasWalletMapper;
 import com.app.mdc.mapper.mdc.WalletMapper;
 import com.app.mdc.mapper.system.RoleMapper;
 import com.app.mdc.mapper.system.RoleUserMapper;
 import com.app.mdc.mapper.system.UserMapper;
 import com.app.mdc.mapper.system.UserTokenMapper;
 import com.app.mdc.model.mdc.UserContract;
+import com.app.mdc.model.mdc.VasWallet;
 import com.app.mdc.model.mdc.Wallet;
-import com.app.mdc.model.system.*;
+import com.app.mdc.model.system.Role;
+import com.app.mdc.model.system.RoleUser;
+import com.app.mdc.model.system.User;
+import com.app.mdc.model.system.UserToken;
 import com.app.mdc.service.mdc.UserContractService;
 import com.app.mdc.service.mdc.WalletService;
 import com.app.mdc.service.system.UserLevelService;
 import com.app.mdc.service.system.UserService;
 import com.app.mdc.service.system.VerificationCodeService;
 import com.app.mdc.utils.Md5Utils;
+import com.app.mdc.utils.httpclient.vas.CoinUtils;
 import com.app.mdc.utils.viewbean.ResponseResult;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,7 +36,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+public class UserServiceImpl extends ServiceImpl <UserMapper, User> implements UserService {
 
     private final UserMapper userMapper;
     private final UserTokenMapper userTokenMapper;
@@ -44,11 +49,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private VerificationCodeService verificationCodeService;
     @Autowired
     private UserContractService userContractService;
+    @Autowired
+    VasWalletMapper vasWalletMapper;
+    @Autowired
+    CoinUtils coinUtils;
+
     @Value("${license.key}")
     private String linceseKey;
     @Value("${mdc.pchost}")
     private String pcHost;
-
 
     //用户账号停用状态
     private static final String USER_STATUS_FROZEN = "1";
@@ -65,8 +74,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> findUserByPage(String name) {
-        EntityWrapper<User> entityWrapper = new EntityWrapper<>();
+    public List <User> findUserByPage(String name) {
+        EntityWrapper <User> entityWrapper = new EntityWrapper <>();
         entityWrapper.eq("deleted", 0);
         if (StringUtils.isNotEmpty(name)) {
             entityWrapper.like("name", name);
@@ -78,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public ResponseResult getOne(String id) {
         //根据用户id获取角色的list，并拼接成ids
-        Map<String, Object> objectMap = new HashMap<>();
+        Map <String, Object> objectMap = new HashMap <>();
 //        map.put("user_id", id);
 //        List<RoleUser> list = roleUserMapper.selectByMap(map);
 //        StringBuilder roleId = new StringBuilder();
@@ -116,24 +125,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //       objectMap.put("roleCode", roleCode.toString());
 
         //查询用户有无临时等级
-        Integer tmpLevel = this.baseMapper.findTmpLevel(user.getId(),new Date());
-        if(tmpLevel != null){
-            user.setLevel(Math.max(user.getLevel(),tmpLevel));
+        Integer tmpLevel = this.baseMapper.findTmpLevel(user.getId(), new Date());
+        if (tmpLevel != null) {
+            user.setLevel(Math.max(user.getLevel(), tmpLevel));
         }
 
         objectMap.put("shareUrl", pcHost + "/register.html?sendCode=" + user.getSendCode());
         //查询用户合约信息
-        EntityWrapper<UserContract> userContractEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <UserContract> userContractEntityWrapper = new EntityWrapper <>();
         userContractEntityWrapper.eq("del_flag", "0");
         userContractEntityWrapper.eq("user_id", id);
-        List<UserContract> userContracts = userContractService.selectList(userContractEntityWrapper);
+        List <UserContract> userContracts = userContractService.selectList(userContractEntityWrapper);
         objectMap.put("userContractList", userContracts);
         return ResponseResult.success().add(objectMap);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized ResponseResult add(Map<String, Object> map) throws Throwable {
+    public synchronized ResponseResult add(Map <String, Object> map) throws Throwable {
         //count>0说明username已存在，isRepeat>0说明姓名已存在，重复需要加标识
         validatePayPassword(((String) map.get("walletPassword")));
         Integer registerType = Integer.parseInt(map.get("registerType").toString());
@@ -155,7 +164,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 新增用户
             //获取推送人id
             int sendCode = Integer.parseInt(map.get("sendCode").toString());
-            Map<String, Object> sendUser = userMapper.getUserBySendCode(sendCode);
+            Map <String, Object> sendUser = userMapper.getUserBySendCode(sendCode);
             if (sendUser == null || sendUser.get("userId") == null) {
                 //推送码失效
                 return ResponseResult.fail(ApiErrEnum.ERR201);
@@ -212,11 +221,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             this.updateRecMemberSize(sendUserId);
 
             //添加钱包
-            try {
-                walletService.createWallet(Integer.parseInt(userId), (String) map.get("walletPassword"));
-            } catch (Exception e) {
-                return ResponseResult.fail();
-            }
+            walletService.createWallet(Integer.parseInt(userId), (String) map.get("walletPassword"));
+            VasWallet vasWallet = coinUtils.createaddress(Integer.valueOf(userId));
+            vasWalletMapper.insert(vasWallet);
             return userCount == 1 ? ResponseResult.success() : ResponseResult.fail();
         }
     }
@@ -249,11 +256,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized ResponseResult update(Map<String, Object> map) {
+    public synchronized ResponseResult update(Map <String, Object> map) {
         //判断username是否重复
-        EntityWrapper<User> userEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <User> userEntityWrapper = new EntityWrapper <>();
         userEntityWrapper.eq("login_name", map.get("loginName")).eq("del_flag", 0);
-        List<User> userList = this.baseMapper.selectList(userEntityWrapper);
+        List <User> userList = this.baseMapper.selectList(userEntityWrapper);
 
         if (userList.size() > 0 && !map.get("user_id").equals(userList.get(0).getId())) {
             return ResponseResult.fail(ApiErrEnum.ERR600);
@@ -268,7 +275,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             int userCount = userMapper.updateById(user);
 
             //先删除中间表,再添加
-            Map<String, Object> objectMap = new HashMap<>();
+            Map <String, Object> objectMap = new HashMap <>();
             objectMap.put("user_id", map.get("id"));
 
             //角色用户中间表的操作
@@ -300,7 +307,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.setUpdateTime(new Date());
                 userMapper.updateById(user);
                 //删除中间表
-                Map<String, Object> objectMap = new HashMap<>();
+                Map <String, Object> objectMap = new HashMap <>();
                 objectMap.put("user_id", string);
                 roleUserMapper.deleteByMap(objectMap);
             }
@@ -308,20 +315,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return ResponseResult.success();
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> doUserLogin(String username, String password, HttpSession httpSession, String loginType)
+    public Map <String, Object> doUserLogin(String username, String password, HttpSession httpSession, String loginType)
             throws BusinessException {
 
-        Map<String, Object> result = new HashMap<>();
+        Map <String, Object> result = new HashMap <>();
 
         //校验用户名跟密码，并把user放入session
-        EntityWrapper<User> entityWrapper = new EntityWrapper<>();
+        EntityWrapper <User> entityWrapper = new EntityWrapper <>();
         entityWrapper.eq("login_name", username)
                 .eq("del_flag", 0);
 //                .eq("status", "A");
-        List<User> users = this.selectList(entityWrapper);
+        List <User> users = this.selectList(entityWrapper);
         if (users.size() == 0) {
             throw new BusinessException("未找到该账号，请联系管理员！");
         }
@@ -346,7 +352,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         httpSession.setAttribute("user", user);
 
         //用户登录获取该用户的角色列表传过去
-        List<Role> roles = roleMapper.findRolesByUserId(user.getId());
+        List <Role> roles = roleMapper.findRolesByUserId(user.getId());
         result.put("roles", roles);
 
         //运维人员角色不给登录后端管理系统
@@ -365,16 +371,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //        }
 
         //生成用户token，如果有未失效token，返回该token，如果没有则生成token
-        EntityWrapper<UserToken> tokenEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <UserToken> tokenEntityWrapper = new EntityWrapper <>();
         tokenEntityWrapper.eq("user_id", user.getId())
                 .gt("end_time", new Date())
                 .orderBy("end_time", false);
-        List<UserToken> userTokens = userTokenMapper.selectList(tokenEntityWrapper);
+        List <UserToken> userTokens = userTokenMapper.selectList(tokenEntityWrapper);
         UserToken userToken;
 
         //获取用户所属企业
 //        String companyId = user.getCompanyid();
-
 
         //重新登录后，有效的token自动刷新1个星期
         long currentTime = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000;
@@ -397,10 +402,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User findUserByToken(String userToken) throws BusinessException {
 
         //校验token是否在当前时间生效
-        EntityWrapper<UserToken> entityWrapper = new EntityWrapper<>();
+        EntityWrapper <UserToken> entityWrapper = new EntityWrapper <>();
         entityWrapper.gt("end_time", new Date())
                 .eq("token", userToken);
-        List<UserToken> usertokens = userTokenMapper.selectList(entityWrapper);
+        List <UserToken> usertokens = userTokenMapper.selectList(entityWrapper);
         if (usertokens.size() == 0) {
             throw new BusinessException("token失效");
         } else {
@@ -422,9 +427,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException("用户不存在");
         }
 
-        EntityWrapper<User> objectEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <User> objectEntityWrapper = new EntityWrapper <>();
         objectEntityWrapper.eq("login_name", loginName);
-        List<User> users = this.baseMapper.selectList(objectEntityWrapper);
+        List <User> users = this.baseMapper.selectList(objectEntityWrapper);
         if (users.size() == 0 || !users.get(0).getId().equals(id)) {
             throw new BusinessException("请输入当前用户注册时的邮箱或者手机号");
         }
@@ -437,7 +442,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             validatePayPassword(newPassword);
             user.setPayPassword(Md5Utils.hash(u.getLoginName(), newPassword));
-            EntityWrapper<Wallet> wrapper = new EntityWrapper<>();
+            EntityWrapper <Wallet> wrapper = new EntityWrapper <>();
             wrapper.eq("user_id", user.getId());
             Wallet wallet = new Wallet();
             wallet.setPassword(newPassword);
@@ -448,17 +453,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<Map<String, Object>> getAddressBook(Map<String, Object> map, String userId) {
-        List<Map<String, Object>> userList = new ArrayList<>();
+    public List <Map <String, Object>> getAddressBook(Map <String, Object> map, String userId) {
+        List <Map <String, Object>> userList = new ArrayList <>();
 
         if (map.get("code") != null) {
             String code = map.get("code").toString();
             //运维
             if (code.equals("ops_user")) {
-                List<Map<String, Object>> operaterBook = this.baseMapper.getOperaterBook(userId);
+                List <Map <String, Object>> operaterBook = this.baseMapper.getOperaterBook(userId);
                 userList.addAll(operaterBook);
             } else if (code.equals("firm_user")) {//企业用户
-                List<Map<String, Object>> companyUserBook = this.baseMapper.getCompanyUserBook(userId);
+                List <Map <String, Object>> companyUserBook = this.baseMapper.getCompanyUserBook(userId);
                 userList.addAll(companyUserBook);
             }
         }
@@ -477,13 +482,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<Map<String, Object>> pcAddressBook(String userId) {
+    public List <Map <String, Object>> pcAddressBook(String userId) {
         return this.baseMapper.getPcAddressBook(userId);
     }
 
     @Override
     public void removeTokenByUserId(Integer userId) {
-        EntityWrapper<UserToken> userTokenEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <UserToken> userTokenEntityWrapper = new EntityWrapper <>();
         userTokenEntityWrapper.eq("user_id", userId);
         userTokenMapper.delete(userTokenEntityWrapper);
     }
@@ -497,12 +502,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<Integer> findAllUserIds() {
+    public List <Integer> findAllUserIds() {
         return this.baseMapper.findAllUserIds();
     }
 
     @Override
-    public List<User> getDirectUserLevel(String ids) {
+    public List <User> getDirectUserLevel(String ids) {
         return this.baseMapper.getDirectUserLevel(ids);
     }
 
@@ -524,7 +529,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //查询公工会的进阶合约总额
         BigDecimal unionAdvanceTotalMoney = userContractService.getUnionAdvanceTotalMoney(userId);
         //获取直推人员等级
-        List<User> users = userLevelService.getUsersInUmbrella(userId);
+        List <User> users = userLevelService.getUsersInUmbrella(userId);
         //判断当前用户等级
         Integer copperCount = 0;
         Integer sliverCount = 0;
@@ -591,10 +596,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void resetPassword(String loginName, String password, String payPassword) throws BusinessException {
         validatePayPassword(payPassword);
 
-        EntityWrapper<User> userEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <User> userEntityWrapper = new EntityWrapper <>();
         userEntityWrapper.eq("del_flag", "0");
         userEntityWrapper.eq("login_name", loginName);
-        List<User> users = this.selectList(userEntityWrapper);
+        List <User> users = this.selectList(userEntityWrapper);
         if (users.size() == 0) {
             throw new BusinessException("未查询到响应用户");
         }
@@ -608,10 +613,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void updateUserName(String userId, String userName) throws BusinessException {
-        EntityWrapper<User> userEntityWrapper = new EntityWrapper<>();
+        EntityWrapper <User> userEntityWrapper = new EntityWrapper <>();
         userEntityWrapper.eq("del_flag", "0");
         userEntityWrapper.eq("user_name", userName);
-        List<User> users = this.baseMapper.selectList(userEntityWrapper);
+        List <User> users = this.baseMapper.selectList(userEntityWrapper);
         if (users.size() > 0) {
             throw new BusinessException("该昵称已存在");
         }
@@ -621,10 +626,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.baseMapper.updateById(user);
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized ResponseResult registerAdd(String userName, String loginName, String password, String walletPassword, Integer sendCode, Integer registerType) {
+    public synchronized ResponseResult registerAdd(String userName, String loginName, String password, String walletPassword, Integer sendCode, Integer registerType) throws Throwable {
         try {
             validatePayPassword(walletPassword);
         } catch (BusinessException e) {
@@ -648,7 +652,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             // 新增用户
             //获取推送人id
-            Map<String, Object> sendUser = userMapper.getUserBySendCode(sendCode);
+            Map <String, Object> sendUser = userMapper.getUserBySendCode(sendCode);
             if (sendUser == null || sendUser.get("userId") == null) {
                 //推送码失效
                 return ResponseResult.fail("403", "推送码失效");
@@ -704,15 +708,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             //更新推荐人的团队成员总数
             this.updateRecMemberSize(sendUserId);
-
             //添加钱包
-            try {
-                walletService.createWallet(Integer.parseInt(userId), walletPassword);
-            } catch (Exception e) {
-                return ResponseResult.fail();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
+
+            walletService.createWallet(Integer.parseInt(userId), walletPassword);
+            VasWallet vasWallet = coinUtils.createaddress(Integer.valueOf(userId));
+            vasWalletMapper.insert(vasWallet);
+
             return userCount == 1 ? ResponseResult.success() : ResponseResult.fail();
         }
     }

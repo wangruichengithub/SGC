@@ -50,8 +50,6 @@ public class ScheduleTask {
     private ConfigService configService;
     @Scheduled(cron = "0 */15 * * * ?")
     public void invest() throws ExecutionException, InterruptedException {
-
-
         String contractAddress = InfuraInfo.USDT_CONTRACT_ADDRESS.getDesc();
         List<Wallet> wallets = walletMapper.selectByMap(new HashMap<>());
         Config config = configService.getByKey("INFURA_ADDRESS");

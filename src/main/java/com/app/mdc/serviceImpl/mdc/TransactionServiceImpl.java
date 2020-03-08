@@ -4,14 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.app.mdc.enums.ApiErrEnum;
 import com.app.mdc.enums.InfuraInfo;
 import com.app.mdc.exception.BusinessException;
+import com.app.mdc.mapper.mdc.TransactionMapper;
 import com.app.mdc.mapper.mdc.WalletMapper;
 import com.app.mdc.mapper.system.UserMapper;
 import com.app.mdc.model.mdc.Transaction;
-import com.app.mdc.mapper.mdc.TransactionMapper;
 import com.app.mdc.model.mdc.Wallet;
 import com.app.mdc.model.system.Config;
 import com.app.mdc.model.system.User;
-import com.app.mdc.schedule.service.ScheduleTask;
 import com.app.mdc.service.mdc.TransactionService;
 import com.app.mdc.service.system.ConfigService;
 import com.app.mdc.service.system.VerificationCodeService;
@@ -26,7 +25,6 @@ import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +40,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -91,9 +88,9 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     public ResponseResult transETH(String toWalletAddress,String transferNumber,String payPassword,String userId,String walletType,String verCode, String verId) throws InterruptedException, ExecutionException, BusinessException, CipherException, IOException {
         User u = userMapper.selectById(userId);
         //验证支付密码
-        /*if (StringUtils.isNotEmpty(u.getPayPassword()) && !Md5Utils.hash(u.getLoginName(), payPassword).equals(u.getPayPassword())) {
+        if (StringUtils.isNotEmpty(u.getPayPassword()) && !Md5Utils.hash(u.getLoginName(), payPassword).equals(u.getPayPassword())) {
             return ResponseResult.fail(ApiErrEnum.ERR202);
-        }*/
+        }
         //验证校验码
         /*boolean flag = verificationCodeService.validateVerCode(verCode,verId);
         if(!flag){
@@ -278,6 +275,24 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         }else{
             confirm(new Date(),toAddress,usdtCOntractAddress,investMoney,userId,transaction.getTransactionId().toString());
         }
+        return ResponseResult.success();
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResponseResult investVas(String userId, String toAddress, String investMoney) {
+        BigDecimal invest = new BigDecimal(investMoney);
+        Transaction transaction = new Transaction();
+        transaction.setCreateTime(new Date());
+        transaction.setToAmount(invest);
+        transaction.setToUserId(Integer.parseInt(userId));
+        transaction.setToWalletAddress(toAddress);
+        //vas
+        transaction.setToWalletType("2");
+        //0-待交易
+        transaction.setTransactionStatus("1");
+        //0-充值
+        transaction.setTransactionType("0");
+        transactionMapper.insert(transaction);
         return ResponseResult.success();
     }
 
@@ -592,6 +607,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         return null;
     }
 
+
     @Transactional(rollbackFor = Exception.class)
     public String transfer(String userId,String payPassword,String walletPassword,String transferNumber,String fromPath,String fromAddress,String toAddress,String walletType) throws IOException, CipherException, ExecutionException, InterruptedException, BusinessException {
         User u = userMapper.selectById(userId);
@@ -770,6 +786,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         transactionMapper.updateById(transaction);
 
     }
+
+
+
+
 
 
 }

@@ -106,4 +106,13 @@ public class ResponseResult {
 		result.setMsg(errEnum.getDesc());
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return "ResponseResult{" +
+				"code='" + code + '\'' +
+				", msg='" + msg + '\'' +
+				", data=" + data +
+				'}';
+	}
 }

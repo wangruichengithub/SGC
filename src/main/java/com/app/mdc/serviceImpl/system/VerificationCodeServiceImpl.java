@@ -1,6 +1,5 @@
 package com.app.mdc.serviceImpl.system;
 
-
 import com.app.mdc.config.mail.MailProperties;
 import com.app.mdc.exception.BusinessException;
 import com.app.mdc.mapper.system.VerificationCodeMapper;
@@ -12,6 +11,8 @@ import com.app.mdc.utils.httpclient.HttpUtil;
 import com.app.mdc.utils.verification.RandomValidateCodeUtil;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 @Service
 public class VerificationCodeServiceImpl extends ServiceImpl<VerificationCodeMapper, VerificationCode> implements VerificationCodeService {
-
+    private static final Logger log = LoggerFactory.getLogger(VerificationCodeServiceImpl.class);
     @Autowired
     private UserService userService;
 
@@ -122,13 +123,20 @@ public class VerificationCodeServiceImpl extends ServiceImpl<VerificationCodeMap
 
     @Override
     public boolean validateVerCode(String verCode, String verId)  {
-        VerificationCode verificationCode = this.baseMapper.selectById(verId);
+        String id = verId.replace(",","");
+        VerificationCode verificationCode = this.baseMapper.selectById(id);
+        log.info("verId转换为{}/{}",id,verCode);
         if(verificationCode == null){
             return false;
         }
+        Boolean result  = verCode.equals(verificationCode.getCode());
+
+        if (result){
+            this.baseMapper.deleteById(verificationCode.getId());
+        }
         //验证成功后删除该验证码
-        this.baseMapper.deleteById(verificationCode.getId());
-        return verCode.equals(verificationCode.getCode());
+
+        return result;
     }
 
 }

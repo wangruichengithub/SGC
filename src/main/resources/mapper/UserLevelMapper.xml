@@ -126,9 +126,9 @@
         )
     </select>
 
-    <select id="getGhztList" resultType="com.app.mdc.model.system.User">
+    <select id="getGhztList" resultType="Map">
         select
-        su.user_id as userId ,
+        user_id as userId ,
         create_time as createTime ,
         user_name as userName,
         login_name as loginName ,

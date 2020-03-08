@@ -10,13 +10,11 @@ import com.app.mdc.service.system.*;
 import com.app.mdc.utils.viewbean.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -82,12 +80,12 @@ public class MainController extends BaseController {
             @RequestParam String verCode,
             @RequestParam String verId,
             @RequestParam Integer registerType
-    )
-    {
+    ) throws Throwable {
         boolean b = verificationCodeService.validateVerCode(verCode, verId);
         if(!b){
             return ResponseResult.fail("403","验证码校验错误");
         }
+
         return this.userService.registerAdd(userName,loginName,password,walletPassword,sendCode,registerType);
     }
 

@@ -38,7 +38,7 @@ spring:
   profiles: dev
   datasource:
     name: test
-    url: jdbc:mysql://119.28.202.253:3306/numberone?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://119.28.202.253:3306/test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false&useSSL=false&serverTimezone=CTT
     username: root
     password: 123456
 license:

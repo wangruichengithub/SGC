@@ -2,6 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.app.mdc.mapper.mdc.VasWalletMapper">
 
+    <resultMap id="WalletResultMap" type="com.app.mdc.model.mdc.VasWallet">
+        <id column="id" property="id" />
+        <result column="address" property="address" />
+        <result column="balance" property="balance"/>
+        <result column="path" property="path"/>
+        <result column="user_id" property="userId"/>
+        <result column="pubkey" property="pubkey"/>
+        <result column="privkey" property="privkey"/>
+    </resultMap>
+
+    <select id="getWalletByAddress" resultMap="WalletResultMap">
+        select * from vas_wallet where address =#{address}
+    </select>
+
+    <select id="getWalletByUserId" resultMap="WalletResultMap">
+        select * from vas_wallet where user_id =#{userId}
+    </select>
+
 
 
 </mapper>

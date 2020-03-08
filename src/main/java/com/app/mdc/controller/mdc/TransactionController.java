@@ -2,13 +2,10 @@ package com.app.mdc.controller.mdc;
 
 
 import com.app.mdc.annotation.anno.SystemLogAnno;
-import com.app.mdc.model.system.Dict;
 import com.app.mdc.service.mdc.TransactionService;
 import com.app.mdc.utils.viewbean.Page;
 import com.app.mdc.utils.viewbean.ResponseResult;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,7 +37,7 @@ public class TransactionController {
 	}
 	
 	/**
-	 * 获取交易记录
+		* 获取交易记录
 	 * @param map
 	 * @return 返回的结果，0正确ERR500错误
 	 */

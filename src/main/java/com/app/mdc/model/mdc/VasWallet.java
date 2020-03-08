@@ -19,4 +19,8 @@ public class VasWallet{
     private String privkey;
     private Double balance;
     private String address;
+    private String path;
+
+    public VasWallet() {
+    }
 }

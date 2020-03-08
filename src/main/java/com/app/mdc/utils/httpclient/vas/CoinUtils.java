@@ -1,19 +1,23 @@
 package com.app.mdc.utils.httpclient.vas;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.app.mdc.mapper.mdc.VasWalletMapper;
+import com.app.mdc.model.mdc.Block;
 import com.app.mdc.model.mdc.VasWallet;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 @Component
 @Configuration
 public class CoinUtils {
@@ -40,33 +44,79 @@ public class CoinUtils {
      * @throws Throwable
      */
     public VasWallet createaddress(int userId) throws Throwable {
-        String jsonObject = JSONObject.toJSONString(client.invoke("createaddresses", new Object[] {1}, Object.class));
-        JSONArray result = JSONObject.parseArray(jsonObject);
-        String address ="";
-        String pubkey = "";
-        String privkey = "";
-        for (int i = 0; i < result.size(); i++) {
-             address = result.getJSONObject(i).getString("address");
-             pubkey = result.getJSONObject(i).getString("pubkey");
-             privkey = result.getJSONObject(i).getString("privkey");
-        }
+        String address = JSONObject.toJSONString(client.invoke("getnewaddress", new Object[] {}, Object.class));
         VasWallet vasWallet = VasWallet.builder()
                 .address(address)
                 .userId(userId)
-                .pubkey(pubkey)
-                .privkey(privkey)
+                .pubkey("")
+                .privkey("")
                 .balance(0.00)
                 .build();
         return vasWallet;
     }
 
+
     /**
-     * 导入地址
+     * 获取余额
      * @param address
+     * @return
      * @throws Throwable
      */
-    public void  importAddress(String address) throws Throwable {
-        client.invoke("createaddresses", new Object[] {1}, Object.class);
+    public Double getBalances(String address) throws Throwable {
+        Double ye=0.00;
+        String str = JSONObject.toJSONString(client.invoke("getbalances", new Object[] {address}, Object.class));
+        JSONObject jsonObject = JSONObject.parseObject(str);;
+        JSONArray jsonArray = jsonObject.getJSONArray("total");
+        for(int i=0;i<jsonArray.size();i++){
+            ye = Double.valueOf(jsonArray.getJSONObject(i).get("qty").toString());
+        }
+        return ye;
+    }
+
+    /**
+     * 转账
+     *
+     * @return
+     * @throws Throwable
+     */
+    public void transfer(String formAddress,String toAddress,Double amount) throws Throwable {
+        String str = JSONObject.toJSONString(client.invoke("sendfrom", new Object[] {formAddress,toAddress,amount}, Object.class));
+    }
+
+    /**
+     * 查看区块同步情况
+     */
+    public JSONObject getsyncinfo() throws Throwable {
+       JSONObject jsonObject  = (JSONObject) JSONObject.toJSON(client.invoke("getsyncinfo", new Object[] {}, Object.class));
+       return jsonObject;
+    }
+
+    /**
+     * 解析区块
+     * @return
+     * @throws Throwable
+     */
+    public Block getblock(String height) throws Throwable {
+        LinkedHashMap string = ((LinkedHashMap)client.invoke("getblock", new Object[] {height,4}, Object.class));
+        String json = JSONObject.toJSONString(string);
+        Block vasBlock =stringToBean(json,Block.class);
+        return vasBlock;
+    }
+
+    public static <T> T stringToBean(String str, Class<T> clazz) {
+        if (str == null || str.length() <= 0 || clazz == null) {
+            return null;
+        }
+        if (clazz == int.class || clazz == Integer.class) {
+            return (T) Integer.valueOf(str);
+        } else if (clazz == String.class) {
+            return (T) str;
+        } else if (clazz == long.class || clazz == Long.class) {
+            return (T) Long.valueOf(str);
+        } else {
+            return JSON.toJavaObject(JSON.parseObject(str), clazz);
+        }
+
     }
 
 }

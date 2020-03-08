@@ -5,9 +5,11 @@ import com.app.mdc.model.mdc.UserContract;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@Component
 public interface UserContractMapper extends BaseMapper<UserContract> {
 
     @Select("select sc.id,amount,income_rate as incomeRate from mdc_user_contract muc join sys_contract sc on sc.id = muc.contract_id where muc.user_id = #{userId} and sc.type = #{type}")
@@ -34,4 +36,11 @@ public interface UserContractMapper extends BaseMapper<UserContract> {
      * @return
      */
     BigDecimal getUnionAdvanceTotalMoney(Integer userId);
+
+    /**
+     * 查询合约数量
+     * @param userId
+     * @return
+     */
+    int getContractCount(Integer userId);
 }

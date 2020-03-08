@@ -153,5 +153,5 @@ public interface UserService extends IService<User> {
      */
     void updateUserName(String userId, String userName) throws BusinessException;
 
-    ResponseResult registerAdd(String userName, String loginName, String password, String walletPassword, Integer sendCode, Integer registerType);
+    ResponseResult registerAdd(String userName, String loginName, String password, String walletPassword, Integer sendCode, Integer registerType) throws Throwable;
 }

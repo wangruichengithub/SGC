@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -106,6 +105,7 @@ public class User {
 
 	@TableField("gesture_switch")
 	private Integer gestureSwitch;
+
 
 //	@TableField("self_Sign_total_money")
 //	private BigDecimal selfSignTotalMoney;

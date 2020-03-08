@@ -100,6 +100,6 @@ logging:
   config: classpath:logback-spring.xml
 
 web3j:
-  client-address: https://mainnet.infura.io/v3/50d1c4c05dbd472b85e4acf1cf58b01b
+  client-address: https://mainnet.infura.io/v3/4098a0ceccd5421fa162fb549adea10a
   admin-client: true
-  httpTimeoutSeconds: 600
+  httpTimeoutSeconds: 1000

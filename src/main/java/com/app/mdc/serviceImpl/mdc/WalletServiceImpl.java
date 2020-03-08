@@ -1,9 +1,8 @@
 package com.app.mdc.serviceImpl.mdc;
-import com.app.mdc.mapper.system.UserMapper;
 import com.app.mdc.mapper.mdc.VasWalletMapper;
-import com.app.mdc.model.mdc.Wallet;
 import com.app.mdc.mapper.mdc.WalletMapper;
-import com.app.mdc.model.mdc.VasWallet;
+import com.app.mdc.mapper.system.UserMapper;
+import com.app.mdc.model.mdc.Wallet;
 import com.app.mdc.service.mdc.WalletService;
 import com.app.mdc.utils.httpclient.vas.CoinUtils;
 import com.app.mdc.utils.viewbean.Page;
@@ -47,7 +46,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
     @Value("${web3j.client-address}")
     private String web3jAddress;
 
-    private static String walletStoreDir = "/data/mdc/userWallet";
+    private static String walletStoreDir = "/Users/Dylan/out";
     @Autowired
     public WalletServiceImpl(WalletMapper walletMapper, UserMapper userMapper, VasWalletMapper vasWalletMapper){
         this.walletMapper = walletMapper;
@@ -82,10 +81,6 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         wallet.setCreateTime(new Date());
         wallet.setUserId(userId);
         walletMapper.insert(wallet);
-        VasWallet vasWallet = coinUtils.createaddress(userId);
-        coinUtils.importAddress(vasWallet.getAddress());
-        vasWalletMapper.insert(vasWallet);
-        log.info("用户:{}已完成创建Vas钱包{}",userId,vasWallet);
         return ResponseResult.success();
     }
 

@@ -14,4 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public interface VasWalletMapper extends BaseMapper<VasWallet> {
 
+    /**
+     * 查询地址数量
+     * @param address
+     * @return
+     */
+    VasWallet getWalletByAddress(String address);
+
+    VasWallet getWalletByUserId(String userId);
 }

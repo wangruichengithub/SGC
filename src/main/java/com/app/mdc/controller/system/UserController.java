@@ -13,6 +13,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/admin/users")
 @Api(description = "用户管理")
 public class UserController extends BaseController {
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -91,11 +94,20 @@ public class UserController extends BaseController {
         if (!map.containsKey("verCode") || !map.containsKey("verId")) {
             throw new BusinessException("验证码验证失败");
         }
+        ResponseResult responseResult = new ResponseResult();
         boolean b = verificationCodeService.validateVerCode(map.get("verCode").toString(), map.get("verId").toString());
         if (!b) {
             throw new BusinessException("验证码验证失败");
         }
-        return userService.add(map);
+        try {
+            responseResult = userService.add(map);
+        }catch (Exception e){
+            responseResult = ResponseResult.fail();
+            responseResult = responseResult.setErrMsg("-1",e.getMessage());
+            log.error("创建用户失败"+e.toString());
+           e.printStackTrace();
+        }
+        return responseResult;
     }
 
     /**

@@ -38,11 +38,16 @@ public class UserContractController {
     @ApiOperation("新增用户合同")
     public ResponseResult add(@RequestParam String payPassword,@RequestParam String verCode ,@RequestParam String verId ,@RequestParam Integer userId,@RequestParam Integer contractId,@RequestParam Integer number) throws BusinessException {
         userService.validatePayPassword(userId,payPassword);
-        if(!verificationCodeService.validateVerCode(verCode,verId)){
+        /*if(!verificationCodeService.validateVerCode(verCode,verId)){
             throw new BusinessException("验证码校验错误");
+        }*/
+        if (contractId==4||contractId.equals(4)){
+            return ResponseResult.fail("ERR500","该合约暂未开放");
+        }else {
+            userContractService.add(userId,contractId,number);
+            return ResponseResult.success();
         }
-        userContractService.add(userId,contractId,number);
-        return ResponseResult.success();
+
     }
 
     @RequestMapping(value = "/getUpgradePriceDifference",method = POST)
@@ -58,9 +63,9 @@ public class UserContractController {
     @ApiOperation("合约升级")
     public ResponseResult upgrade(@RequestParam String payPassword,@RequestParam String verCode ,@RequestParam String verId ,@RequestParam Integer userId,@RequestParam Integer ucId,@RequestParam Integer upgradeId) throws BusinessException {
         userService.validatePayPassword(userId,payPassword);
-        if(!verificationCodeService.validateVerCode(verCode,verId)){
+        /*if(!verificationCodeService.validateVerCode(verCode,verId)){
             throw new BusinessException("验证码校验错误");
-        }
+        }*/
         userContractService.upgrade(userId,ucId,upgradeId);
         return ResponseResult.success();
     }
@@ -79,9 +84,9 @@ public class UserContractController {
     @ApiOperation("合约解约")
     public ResponseResult rescind(@RequestParam String payPassword,@RequestParam String verCode ,@RequestParam String verId ,@RequestParam Integer userId,@RequestParam Integer ucId) throws BusinessException {
         userService.validatePayPassword(userId,payPassword);
-        if(!verificationCodeService.validateVerCode(verCode,verId)){
+        /*if(!verificationCodeService.validateVerCode(verCode,verId)){
             throw new BusinessException("验证码校验错误");
-        }
+        }*/
         userContractService.rescind(userId,ucId);
         return ResponseResult.success();
     }

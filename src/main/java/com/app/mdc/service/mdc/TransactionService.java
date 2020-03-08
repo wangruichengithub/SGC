@@ -6,7 +6,6 @@ import com.app.mdc.utils.viewbean.Page;
 import com.app.mdc.utils.viewbean.ResponseResult;
 import com.baomidou.mybatisplus.service.IService;
 import org.web3j.crypto.CipherException;
-import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,13 +35,24 @@ public interface TransactionService extends IService<Transaction> {
     ResponseResult getETHBlance(Page page, Map<String,Object> params);
 
     /**
-     * 充值
+     * 充值usdt
      * @param userId 用户id
      * @param toAddress 钱包address
      * @param investMoney 充值金额
      * @return ResponseResult
      */
     ResponseResult investUSDT(String userId,String toAddress,String investMoney);
+
+    /**
+     * 充值 Vas
+     * @param userId
+     * @param toAddress
+     * @param investMoney
+     * @return
+     */
+    ResponseResult investVas(String userId,String toAddress,String investMoney);
+
+
 
     /**
      * 提现
@@ -85,4 +95,5 @@ public interface TransactionService extends IService<Transaction> {
     List<Transaction> incomeHistory(Integer userId);
 
     ResponseResult transAllEth() throws ExecutionException, InterruptedException;
+
 }

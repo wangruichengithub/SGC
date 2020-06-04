@@ -46,7 +46,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
     @Value("${web3j.client-address}")
     private String web3jAddress;
 
-    private static String walletStoreDir = "/Users/Dylan/out";
+    private static String walletStoreDir = "/Users/Dylan/Downloads/";
     @Autowired
     public WalletServiceImpl(WalletMapper walletMapper, UserMapper userMapper, VasWalletMapper vasWalletMapper){
         this.walletMapper = walletMapper;

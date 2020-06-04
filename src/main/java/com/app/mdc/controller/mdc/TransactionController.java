@@ -62,12 +62,13 @@ public class TransactionController {
 									 @RequestParam(required = true)String walletType,
 								   @RequestParam String verCode,
 								   @RequestParam String verId) {
-		try {
+		/*try {
 			return transactionService.transETH(toWalletAddress,transferNumber,payPassword,userId,walletType,verCode,verId);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseResult.fail("ERR500",e.getMessage());
-		}
+		}*/
+		return  ResponseResult.fail("-999","内部转账功能已关闭");
 	}
 
 	/**
@@ -99,11 +100,12 @@ public class TransactionController {
 	@SystemLogAnno(module = "交易管理", operation = "mdc闪兑")
 	@ResponseBody
 	public ResponseResult convertMDC(@RequestParam String userId,@RequestParam String convertMoney,@RequestParam String payPassword) {
-		try {
+		/*try {
 			return transactionService.convertMDC(userId, convertMoney, payPassword);
 		}catch (Exception e){
 			return ResponseResult.fail("-999",e.getMessage());
-		}
+		}*/
+		return ResponseResult.fail("-999","闪兑功能关闭");
 
 	}
 

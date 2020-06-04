@@ -48,7 +48,7 @@ public class ScheduleTask {
     private WalletMapper walletMapper;
     @Autowired
     private ConfigService configService;
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0 */3 * * * ?")
     public void invest() throws ExecutionException, InterruptedException {
         String contractAddress = InfuraInfo.USDT_CONTRACT_ADDRESS.getDesc();
         List<Wallet> wallets = walletMapper.selectByMap(new HashMap<>());

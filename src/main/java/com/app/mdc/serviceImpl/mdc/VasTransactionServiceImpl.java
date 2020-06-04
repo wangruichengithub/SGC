@@ -79,7 +79,7 @@ public class VasTransactionServiceImpl extends ServiceImpl<TransactionMapper, Tr
         if (vasWallet!=null){
             Double banlance = vasWallet.getBalance();
             if(Double.parseDouble(transferNumber) > banlance){
-                return ResponseResult.fail(ApiErrEnum.ERR205);
+                return ResponseResult.fail(ApiErrEnum.ERR207);
             }
             Double fee = Double.parseDouble(configService.getByKey("VAS_CASH_OUT_FEE").getConfigValue());
             if(amount < fee){
@@ -95,7 +95,7 @@ public class VasTransactionServiceImpl extends ServiceImpl<TransactionMapper, Tr
             transaction.setCreateTime(new Date());
             transaction.setFromAmount(BigDecimal.valueOf(amount));
             transaction.setFromUserId(Integer.parseInt(userId));
-            transaction.setFromWalletAddress(toAddress);
+            transaction.setFromWalletAddress(fromAddress);
             //0-usdt
             transaction.setFromWalletType("2");
             transaction.setToAmount(BigDecimal.valueOf(amount).subtract(transaction.getFeeAmount()));

@@ -17,7 +17,6 @@
     <meta name="Googlebot" content="noindex,nofollow"/>
     <meta name="MicroMessenger" content="noindex,nofollow"/>
     <meta name="QQBrowser" content="noindex,nofollow"/>
-
 </head>
 <style>
     html {
@@ -128,6 +127,7 @@
                 <img class="submitBtn" onclick="submit()" src="/img/submit.png">
                 <div><i id="errMsg" style="color: red"></i></div>
             </div>
+
         </div>
     </div>
 </div>
@@ -194,7 +194,6 @@
             alert("两次输入的登录密码不相同");
             return;
         }
-        var downAppUrl  = "";
         $.ajax({
             url: "/registerAdd?userName=" + userName + "&loginName=" + userName + "&password=" + password + "&walletPassword=" + payPassWord
                 + "&sendCode=" + shareCode + "&verCode=" + code + "&verId=" + verId + "&registerType=" + registerType,
@@ -205,32 +204,13 @@
             success: function (result) {
                 if (result.code + "" === "0") {
                     alert("注册成功");
-                    if (isIos()){
-                        downAppUrl = "http://t.cn/A6zz7mtE";
-                    }else {
-                        downAppUrl = "http://t.cn/A6zzZA56";
-                    }
-                    window.location.href= downAppUrl;
+                    window.location.href= "http://qcode.di198.com/flqJ";
                 } else {
                    alert(result.msg);
                 }
             }
         })
         ;
-    }
-
-    // 判断设备为 ios
-    function isIos() {
-        var u = navigator.userAgent;
-        if (u.indexOf("iPhone") > -1 || u.indexOf("iOS") > -1) {
-            window.location.href= 'https://by.kakp.top/6GyqBe';
-            return true;
-        }else {
-            window.location.href= 'https://by.kakp.top/PGWu9f';
-            return false;
-
-        }
-
     }
 
     function showPass() {

@@ -153,10 +153,6 @@ public class UserServiceImpl extends ServiceImpl <UserMapper, User> implements U
             //登录名称重复
             return ResponseResult.fail(ApiErrEnum.ERR600);
         }
-        //else if (isRepeat > 0) {
-//            //用户名称重复
-//            return ResponseResult.fail(ApiErrEnum.ERR602);
-//        }
         else if (map.get("sendCode") == null) {
             //推荐码不存在
             return ResponseResult.fail();
@@ -206,20 +202,8 @@ public class UserServiceImpl extends ServiceImpl <UserMapper, User> implements U
 
             //新增用户角色中间表
             String userId = tbUser.getId();
-//            String roleId = map.get("roleId").toString();
-//            if (StringUtils.isNotEmpty(roleId)) {
-//                String[] arr = roleId.split(",");
-//                for (String string : arr) {
-//                    RoleUser roleUser = new RoleUser();
-//                    roleUser.setRoleId(string);
-//                    roleUser.setUserId(userId);
-//                    roleUserMapper.insert(roleUser);
-//                }
-//            }
-
             //更新推荐人的团队成员总数
             this.updateRecMemberSize(sendUserId);
-
             //添加钱包
             walletService.createWallet(Integer.parseInt(userId), (String) map.get("walletPassword"));
             VasWallet vasWallet = coinUtils.createaddress(Integer.valueOf(userId));
@@ -629,12 +613,12 @@ public class UserServiceImpl extends ServiceImpl <UserMapper, User> implements U
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized ResponseResult registerAdd(String userName, String loginName, String password, String walletPassword, Integer sendCode, Integer registerType) throws Throwable {
-        try {
+      /*  try {
             validatePayPassword(walletPassword);
         } catch (BusinessException e) {
             return ResponseResult.fail("500", e.getMessage());
         }
-
+*/
         //count>0说明username已存在，isRepeat>0说明姓名已存在，重复需要加标识
         Integer count = userMapper.user(loginName);
 //        Integer isRepeat = userMapper.isRepeat(userName);

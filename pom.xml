@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.app</groupId>
-	<artifactId>mdc</artifactId>
+	<artifactId>sgc</artifactId>
 	<version>1.0.0</version>
 	<url>http://maven.apache.org</url>
 
